@@ -26,7 +26,7 @@ public:
     }
 
     Vec3 sample(float u, float v) const {
-        if (data.empty()) return Vec3(0.8f, 0.8f, 0.8f); // Серый цвет по умолчанию, если нет текстуры
+        if (data.empty()) return Vec3(0.8f, 0.8f, 0.8f); 
         u = std::clamp(u, 0.0f, 1.0f);
         v = std::clamp(v, 0.0f, 1.0f);
         int x = std::min(static_cast<int>(u * width), width - 1);
@@ -39,16 +39,59 @@ public:
         std::ofstream out(filename, std::ios::binary);
         if (!out) return false;
         uint8_t header[18] = { 0 };
-        header[2] = 2; // Несжатый RGB
+        header[2] = 2; 
         header[12] = width & 0xFF; header[13] = (width >> 8) & 0xFF;
         header[14] = height & 0xFF; header[15] = (height >> 8) & 0xFF;
-        header[16] = 24; // 24 бита на пиксель
+        header[16] = 24;
         out.write(reinterpret_cast<char*>(header), 18);
         for (const auto& c : data) {
             uint8_t pixel[3] = { c.b, c.g, c.r };
             out.write(reinterpret_cast<char*>(pixel), 3);
         }
         return true;
+    }
+
+    bool saveBMP(const std::string& filename) const {
+      std::ofstream out(filename, std::ios::binary);
+      if (!out) return false;
+
+      int padding = (4 - (width * 3) % 4) % 4;
+      uint32_t dataSize = (width * 3 + padding) * height;
+      uint32_t fileSize = 54 + dataSize;
+
+      uint8_t fileHeader[14] = {'B', 'M'};
+      fileHeader[2] = fileSize & 0xFF;
+      fileHeader[3] = (fileSize >> 8) & 0xFF;
+      fileHeader[4] = (fileSize >> 16) & 0xFF;
+      fileHeader[5] = (fileSize >> 24) & 0xFF;
+      fileHeader[10] = 54;  
+
+      uint8_t infoHeader[40] = {0};
+      infoHeader[0] = 40;  
+      infoHeader[4] = width & 0xFF;
+      infoHeader[5] = (width >> 8) & 0xFF;
+      infoHeader[6] = (width >> 16) & 0xFF;
+      infoHeader[7] = (width >> 24) & 0xFF;
+      infoHeader[8] = height & 0xFF;
+      infoHeader[9] = (height >> 8) & 0xFF;
+      infoHeader[10] = (height >> 16) & 0xFF;
+      infoHeader[11] = (height >> 24) & 0xFF;
+      infoHeader[12] = 1;   
+      infoHeader[14] = 24;  
+
+      out.write(reinterpret_cast<char*>(fileHeader), 14);
+      out.write(reinterpret_cast<char*>(infoHeader), 40);
+
+      uint8_t pad[3] = {0, 0, 0};
+      for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+          const Color& c = data[y * width + x];
+          uint8_t pixel[3] = {c.b, c.g, c.r};
+          out.write(reinterpret_cast<char*>(pixel), 3);
+        }
+        if (padding > 0) out.write(reinterpret_cast<char*>(pad), padding);
+      }
+      return true;
     }
 
     bool loadTGA(const std::string& filename) {

@@ -67,7 +67,6 @@ int main(int argc, char** argv) {
     drawTriangle(clipCoords, shader, framebuffer, zbuffer);
   }
 
-  framebuffer.saveTGA("output.tga");
-  std::cout << "Рендер завершен! Результат сохранен в output.tga\n";
+  framebuffer.saveBMP("output.bmp");
   return 0;
 }
