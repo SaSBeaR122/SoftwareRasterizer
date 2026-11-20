@@ -1,0 +1,3 @@
+D:/SoftwareRasterizer/out/build/x64-Debug/CMakeFiles/SoftwareRasterizer.dir
+D:/SoftwareRasterizer/out/build/x64-Debug/CMakeFiles/edit_cache.dir
+D:/SoftwareRasterizer/out/build/x64-Debug/CMakeFiles/rebuild_cache.dir
